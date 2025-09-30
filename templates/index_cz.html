@@ -68,12 +68,41 @@
 
         .gallery-img {
             cursor: pointer;
-            transition: opacity 0.2s ease;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.15);
         }
-
         .gallery-img:hover {
-            opacity: 0.8;
+            opacity: 0.85;
+            transform: scale(1.03) translateY(-2px);
+            box-shadow: 0 6px 24px 0 rgba(0,255,255,0.15);
         }
+        #gallery-grid {
+            gap: 2rem;
+        }
+        .gallery-img.selected {
+            outline: 3px solid #06b6d4;
+            outline-offset: 2px;
+        }
+        .fullscreen-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(15,23,42,0.7);
+            border: none;
+            color: #fff;
+            font-size: 3rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            z-index: 20;
+            transition: background 0.2s;
+        }
+        .fullscreen-arrow:hover {
+            background: rgba(6,182,212,0.8);
+            color: #0f172a;
+        }
+        .fullscreen-arrow.left { left: 2vw; }
+        .fullscreen-arrow.right { right: 2vw; }
     </style>
 </head>
 
@@ -81,10 +110,11 @@
     <nav class="fixed top-0 left-0 right-0 bg-slate-900/80 backdrop-blur-sm border-b border-slate-800 z-50">
         <div class="max-w-7xl mx-auto px-6 py-4">
             <div class="flex items-center justify-between">
-        <span class="text-xl font-semibold text-white">Moje <a href="https://www.instagram.com/photo.c2c/"
-            class="font-bold text-cyan-500 hover:text-cyan-600">photo.c2c</a> portfolio</span>
+                <span class="text-xl font-semibold text-white">Moje <a href="https://www.instagram.com/photo.c2c/"
+                        class="font-bold text-cyan-500 hover:text-cyan-600">photo.c2c</a> portfolio</span>
                 <div class="hidden md:flex items-center gap-8">
-                    <a href="/" class="text-slate-400 hover:text-cyan-400 transition-colors"><span class="font-bold">CZ</span>/EN</a>
+                    <a href="/" class="text-slate-400 hover:text-cyan-400 transition-colors"><span
+                            class="font-bold">CZ</span>/EN</a>
                     <a href="#portfolio" class="text-slate-400 hover:text-cyan-400 transition-colors">Portfolio</a>
                     <a href="#about" class="text-slate-400 hover:text-cyan-400 transition-colors">O mně</a>
                     <a href="#contact" class="text-slate-400 hover:text-cyan-400 transition-colors">Kontakt</a>
@@ -110,7 +140,8 @@
             <div class="max-w-4xl">
                 <h1 class="text-5xl md:text-7xl font-bold text-white mb-6">Ahoj, jsem C2C</h1>
                 <p class="text-xl md:text-2xl text-slate-400 mb-4">Fotograf & Vývojář</p>
-                <p class="text-lg text-slate-500 max-w-2xl">Rád zachycuji události svým objektivem a inspiruji ostatní fotografy, aby dělali totéž. Také mě baví programování a tvorba digitálních zážitků.</p>
+                <p class="text-lg text-slate-500 max-w-2xl">Rád zachycuji události svým objektivem a inspiruji ostatní
+                    fotografy, aby dělali totéž. Také mě baví programování a tvorba digitálních zážitků.</p>
             </div>
         </section>
 
@@ -118,65 +149,17 @@
             <div class="max-w-7xl mx-auto">
                 <h2 class="text-3xl font-bold text-white mb-12">Ukázky mé práce</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for project in projects %}
                     <div class="project-card bg-slate-800/50 rounded-lg overflow-hidden cursor-pointer border border-slate-700 hover:border-cyan-400/50"
-                        onclick="openGallery('urban')">
-                        <img src="/placeholder.svg?height=400&width=600" alt="Urban Exploration"
-                            class="w-full h-64 object-cover">
+                        onclick="openFullscreen('/portfolio/{{ project.slug }}/{{ project.image }}')">
+                        <img src="/portfolio/{{ project.slug }}/{{ project.image }}" alt="{{ project.title.cz }}" class="w-full h-64 object-cover">
                         <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Městská explorace</h3>
-                            <p class="text-slate-400">Městské krajiny a architektura</p>
+                            <h3 class="text-xl font-semibold text-white mb-2">{{ project.title.cz }}</h3>
+                            <p class="text-slate-400">{{ project.description.cz }} </p>
+                            <p class="text-slate-500 mt-1"> {{ project.date }} </p>
                         </div>
                     </div>
-
-                    <div class="project-card bg-slate-800/50 rounded-lg overflow-hidden cursor-pointer border border-slate-700 hover:border-cyan-400/50"
-                        onclick="openGallery('nature')">
-                        <img src="/placeholder.svg?height=400&width=600" alt="Nature & Landscapes"
-                            class="w-full h-64 object-cover">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Příroda & Krajiny</h3>
-                            <p class="text-slate-400">Přírodní krása a divočina</p>
-                        </div>
-                    </div>
-
-                    <div class="project-card bg-slate-800/50 rounded-lg overflow-hidden cursor-pointer border border-slate-700 hover:border-cyan-400/50"
-                        onclick="openGallery('portrait')">
-                        <img src="/placeholder.svg?height=400&width=600" alt="Portrait Series"
-                            class="w-full h-64 object-cover">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Portrétní série</h3>
-                            <p class="text-slate-400">Lidé a emoce</p>
-                        </div>
-                    </div>
-
-                    <div class="project-card bg-slate-800/50 rounded-lg overflow-hidden cursor-pointer border border-slate-700 hover:border-cyan-400/50"
-                        onclick="openGallery('street')">
-                        <img src="/placeholder.svg?height=400&width=600" alt="Street Photography"
-                            class="w-full h-64 object-cover">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Pouliční fotografie</h3>
-                            <p class="text-slate-400">Spontánní momenty městského života</p>
-                        </div>
-                    </div>
-
-                    <div class="project-card bg-slate-800/50 rounded-lg overflow-hidden cursor-pointer border border-slate-700 hover:border-cyan-400/50"
-                        onclick="openGallery('abstract')">
-                        <img src="/placeholder.svg?height=400&width=600" alt="Abstract & Patterns"
-                            class="w-full h-64 object-cover">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Abstrakce & Vzory</h3>
-                            <p class="text-slate-400">Experimentální kompozice</p>
-                        </div>
-                    </div>
-
-                    <div class="project-card bg-slate-800/50 rounded-lg overflow-hidden cursor-pointer border border-slate-700 hover:border-cyan-400/50"
-                        onclick="openGallery('travel')">
-                        <img src="/placeholder.svg?height=400&width=600" alt="Travel Stories"
-                            class="w-full h-64 object-cover">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Cestovatelské příběhy</h3>
-                            <p class="text-slate-400">Dobrodružství po celém světě</p>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </section>
@@ -185,9 +168,12 @@
             <div class="max-w-4xl mx-auto">
                 <h2 class="text-3xl font-bold text-white mb-8">O mně</h2>
                 <div class="space-y-4 text-slate-400 leading-relaxed">
-                    <p>Jsem vývojář a fotograf, který je nadšený do vytváření vizuálních zážitků jak pomocí kódu, tak fotoaparátem.</p>
-                    <p>Moje práce se zaměřuje na zachycení autentických momentů a tvorbu digitálních nástrojů, které pomáhají ostatním vyprávět jejich příběhy. Věřím v propojení technologií a umění.</p>
-                    <p>Když zrovna neprogramuji nebo nefotím, najdete mě při objevování nových míst, experimentování s novými technikami nebo přispívání do open source projektů.</p>
+                    <p>Jsem vývojář a fotograf, který je nadšený do vytváření vizuálních zážitků jak pomocí kódu, tak
+                        fotoaparátem.</p>
+                    <p>Moje práce se zaměřuje na zachycení autentických momentů a tvorbu digitálních nástrojů, které
+                        pomáhají ostatním vyprávět jejich příběhy. Věřím v propojení technologií a umění.</p>
+                    <p>Když zrovna neprogramuji nebo nefotím, najdete mě při objevování nových míst, experimentování s
+                        novými technikami nebo přispívání do open source projektů.</p>
                 </div>
             </div>
         </section>
@@ -241,104 +227,8 @@
         <img id="fullscreen-img" src="/placeholder.svg" alt="">
     </div>
 
+
     <script>
-        const galleries = {
-            urban: {
-                title: 'Urban Exploration',
-                images: [
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200'
-                ]
-            },
-            nature: {
-                title: 'Nature & Landscapes',
-                images: [
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200'
-                ]
-            },
-            portrait: {
-                title: 'Portrait Series',
-                images: [
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200'
-                ]
-            },
-            street: {
-                title: 'Street Photography',
-                images: [
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200'
-                ]
-            },
-            abstract: {
-                title: 'Abstract & Patterns',
-                images: [
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200'
-                ]
-            },
-            travel: {
-                title: 'Travel Stories',
-                images: [
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200'
-                ]
-            }
-        };
-
-        function openGallery(galleryName) {
-            const gallery = galleries[galleryName];
-            const modal = document.getElementById('gallery-modal');
-            const title = document.getElementById('gallery-title');
-            const grid = document.getElementById('gallery-grid');
-
-            title.textContent = gallery.title;
-            grid.innerHTML = '';
-
-            gallery.images.forEach(imgSrc => {
-                const img = document.createElement('img');
-                img.src = imgSrc;
-                img.alt = gallery.title;
-                img.className = 'gallery-img w-full h-64 object-cover rounded-lg border border-slate-700';
-                img.onclick = () => openFullscreen(imgSrc);
-                grid.appendChild(img);
-            });
-
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeGallery() {
-            const modal = document.getElementById('gallery-modal');
-            modal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
         function openFullscreen(imgSrc) {
             const fullscreen = document.getElementById('fullscreen-viewer');
             const img = document.getElementById('fullscreen-img');

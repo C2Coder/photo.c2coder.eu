@@ -1,5 +1,5 @@
 {
-	"events": [
+	"projects": [
 		{
 			"slug": "robocamp-2025",
 			"title": {
@@ -15,8 +15,7 @@
 				"cz": "Technologický letní tábor plný robotiky a kreativity.",
 				"en": "A tech summer camp full of robotics and creativity."
 			},
-			"photos_dir": "RoboCamp2025",
-			"cover": "template.png"
+			"image": "cover.jpg"
 		}
 	]
 }

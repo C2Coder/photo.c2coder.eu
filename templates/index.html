@@ -84,7 +84,8 @@
                 <span class="text-xl font-semibold text-white">My <a href="https://www.instagram.com/photo.c2c/"
                         class="font-bold text-cyan-500 hover:text-cyan-600">photo.c2c</a> portfolio</span>
                 <div class="hidden md:flex items-center gap-8">
-                    <a href="/cz/" class="text-slate-400 hover:text-cyan-400 transition-colors"><span class="font-semibold">EN</span>/CZ</a>
+                    <a href="/cz/" class="text-slate-400 hover:text-cyan-400 transition-colors"><span
+                            class="font-semibold">EN</span>/CZ</a>
                     <a href="#portfolio" class="text-slate-400 hover:text-cyan-400 transition-colors">Portfolio</a>
                     <a href="#about" class="text-slate-400 hover:text-cyan-400 transition-colors">About me</a>
                     <a href="#contact" class="text-slate-400 hover:text-cyan-400 transition-colors">Contact</a>
@@ -119,65 +120,17 @@
             <div class="max-w-7xl mx-auto">
                 <h2 class="text-3xl font-bold text-white mb-12">Some of My Work</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for project in projects %}
                     <div class="project-card bg-slate-800/50 rounded-lg overflow-hidden cursor-pointer border border-slate-700 hover:border-cyan-400/50"
-                        onclick="openGallery('urban')">
-                        <img src="/placeholder.svg?height=400&width=600" alt="Urban Exploration"
-                            class="w-full h-64 object-cover">
+                        onclick="openFullscreen('/portfolio/{{ project.slug }}/{{ project.image }}')">
+                        <img src="/portfolio/{{ project.slug }}/{{ project.image }}" alt="{{ project.title.en }}" class="w-full h-64 object-cover">
                         <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Urban Exploration</h3>
-                            <p class="text-slate-400">City landscapes and architecture</p>
+                            <h3 class="text-xl font-semibold text-white mb-2">{{ project.title.en }}</h3>
+                            <p class="text-slate-400">{{ project.description.en }} </p>
+                            <p class="text-slate-500 mt-1"> {{ project.date }} </p>
                         </div>
                     </div>
-
-                    <div class="project-card bg-slate-800/50 rounded-lg overflow-hidden cursor-pointer border border-slate-700 hover:border-cyan-400/50"
-                        onclick="openGallery('nature')">
-                        <img src="/placeholder.svg?height=400&width=600" alt="Nature & Landscapes"
-                            class="w-full h-64 object-cover">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Nature & Landscapes</h3>
-                            <p class="text-slate-400">Natural beauty and wilderness</p>
-                        </div>
-                    </div>
-
-                    <div class="project-card bg-slate-800/50 rounded-lg overflow-hidden cursor-pointer border border-slate-700 hover:border-cyan-400/50"
-                        onclick="openGallery('portrait')">
-                        <img src="/placeholder.svg?height=400&width=600" alt="Portrait Series"
-                            class="w-full h-64 object-cover">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Portrait Series</h3>
-                            <p class="text-slate-400">People and expressions</p>
-                        </div>
-                    </div>
-
-                    <div class="project-card bg-slate-800/50 rounded-lg overflow-hidden cursor-pointer border border-slate-700 hover:border-cyan-400/50"
-                        onclick="openGallery('street')">
-                        <img src="/placeholder.svg?height=400&width=600" alt="Street Photography"
-                            class="w-full h-64 object-cover">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Street Photography</h3>
-                            <p class="text-slate-400">Candid moments in urban life</p>
-                        </div>
-                    </div>
-
-                    <div class="project-card bg-slate-800/50 rounded-lg overflow-hidden cursor-pointer border border-slate-700 hover:border-cyan-400/50"
-                        onclick="openGallery('abstract')">
-                        <img src="/placeholder.svg?height=400&width=600" alt="Abstract & Patterns"
-                            class="w-full h-64 object-cover">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Abstract & Patterns</h3>
-                            <p class="text-slate-400">Experimental compositions</p>
-                        </div>
-                    </div>
-
-                    <div class="project-card bg-slate-800/50 rounded-lg overflow-hidden cursor-pointer border border-slate-700 hover:border-cyan-400/50"
-                        onclick="openGallery('travel')">
-                        <img src="/placeholder.svg?height=400&width=600" alt="Travel Stories"
-                            class="w-full h-64 object-cover">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Travel Stories</h3>
-                            <p class="text-slate-400">Adventures around the world</p>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </section>
@@ -228,121 +181,12 @@
         </div>
     </footer>
 
-    <div id="gallery-modal" class="modal">
-        <div class="w-full max-w-7xl mx-auto p-6">
-            <div class="flex items-center justify-between mb-8">
-                <h2 id="gallery-title" class="text-3xl font-bold text-white"></h2>
-                <button onclick="closeGallery()"
-                    class="text-slate-400 hover:text-white text-4xl leading-none">&times;</button>
-            </div>
-            <div id="gallery-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            </div>
-        </div>
-    </div>
-
     <div id="fullscreen-viewer" class="fullscreen" onclick="closeFullscreen()">
         <button class="absolute top-6 right-6 text-white text-4xl leading-none z-10">&times;</button>
         <img id="fullscreen-img" src="/placeholder.svg" alt="">
     </div>
 
     <script>
-        const galleries = {
-            urban: {
-                title: 'Urban Exploration',
-                images: [
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200'
-                ]
-            },
-            nature: {
-                title: 'Nature & Landscapes',
-                images: [
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200'
-                ]
-            },
-            portrait: {
-                title: 'Portrait Series',
-                images: [
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200'
-                ]
-            },
-            street: {
-                title: 'Street Photography',
-                images: [
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200'
-                ]
-            },
-            abstract: {
-                title: 'Abstract & Patterns',
-                images: [
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200'
-                ]
-            },
-            travel: {
-                title: 'Travel Stories',
-                images: [
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200',
-                    '/placeholder.svg?height=800&width=1200'
-                ]
-            }
-        };
-
-        function openGallery(galleryName) {
-            const gallery = galleries[galleryName];
-            const modal = document.getElementById('gallery-modal');
-            const title = document.getElementById('gallery-title');
-            const grid = document.getElementById('gallery-grid');
-
-            title.textContent = gallery.title;
-            grid.innerHTML = '';
-
-            gallery.images.forEach(imgSrc => {
-                const img = document.createElement('img');
-                img.src = imgSrc;
-                img.alt = gallery.title;
-                img.className = 'gallery-img w-full h-64 object-cover rounded-lg border border-slate-700';
-                img.onclick = () => openFullscreen(imgSrc);
-                grid.appendChild(img);
-            });
-
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeGallery() {
-            const modal = document.getElementById('gallery-modal');
-            modal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
         function openFullscreen(imgSrc) {
             const fullscreen = document.getElementById('fullscreen-viewer');
             const img = document.getElementById('fullscreen-img');
