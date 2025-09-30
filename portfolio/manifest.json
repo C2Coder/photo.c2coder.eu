@@ -1,0 +1,23 @@
+{
+	"events": [
+		{
+			"slug": "robocamp-2025",
+			"title": {
+				"cz": "RoboCamp 2025",
+				"en": "RoboCamp 2025"
+			},
+			"date": "2025-08-15",
+			"place": {
+				"cz": "Praha, Česká republika",
+				"en": "Prague, Czech Republic"
+			},
+			"description": {
+				"cz": "Technologický letní tábor plný robotiky a kreativity.",
+				"en": "A tech summer camp full of robotics and creativity."
+			},
+			"photos_dir": "RoboCamp2025",
+			"cover": "template.png"
+		}
+	]
+}
+
