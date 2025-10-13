@@ -26,8 +26,10 @@ def render():
         projects = json.load(f).get("projects", [])
 
     create_cname("photo.c2coder.eu")
-    shutil.copytree("portfolio", "dist/portfolio")
-    shutil.copytree("static", "dist/static", dirs_exist_ok=True)
+    if os.path.exists("portfolio"):
+        shutil.copytree("portfolio", "dist/portfolio")
+    if os.path.exists("static"):
+        shutil.copytree("static", "dist/static", dirs_exist_ok=True)
 
     gallery = []
     for project in projects:
