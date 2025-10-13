@@ -1,0 +1,22 @@
+{
+	"projects": [
+		{
+			"slug": "uffo-soldering-2025",
+			"title": {
+				"cz": "Přehlídka Středních Škol 2025",
+				"en": "Secondary School Exhibition 2025"
+			},
+			"date": "2025-10-10",
+			"place": {
+				"cz": "Uffo Trutnov, Česká republika",
+				"en": "Uffo Trutnov, Czech Republic"
+			},
+			"description": {
+				"cz": "Pájení na Přehlídce Středních Škol 2025. #PeFu #Uffo #Trutnov",
+				"en": "Soldering at the Secondary School Exhibition 2025. #PeFu #Uffo #Trutnov"
+			},
+			"image": "cover.jpg"
+		}
+	]
+}
+
