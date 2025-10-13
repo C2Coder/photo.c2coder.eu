@@ -1,19 +1,19 @@
 {
 	"projects": [
 		{
-			"slug": "robocamp-2025",
+			"slug": "uffo-soldering-2025",
 			"title": {
-				"cz": "RoboCamp 2025",
-				"en": "RoboCamp 2025"
+				"cz": "Přehlídka Středních Škol 2025",
+				"en": "Secondary School Exhibition 2025"
 			},
-			"date": "2025-08-15",
+			"date": "2025-10-10",
 			"place": {
-				"cz": "Praha, Česká republika",
-				"en": "Prague, Czech Republic"
+				"cz": "Uffo Trutnov, Česká republika",
+				"en": "Uffo Trutnov, Czech Republic"
 			},
 			"description": {
-				"cz": "Technologický letní tábor plný robotiky a kreativity.",
-				"en": "A tech summer camp full of robotics and creativity."
+				"cz": "Pájení na Přehlídce Středních Škol 2025. #PeFu #Uffo #Trutnov",
+				"en": "Soldering at the Secondary School Exhibition 2025. #PeFu #Uffo #Trutnov"
 			},
 			"image": "cover.jpg"
 		}
