@@ -1,0 +1,16 @@
+{
+  "projects": [
+    {
+      "slug": "uffo-soldering-2025",
+      "title": "Secondary School Exhibition 2025",
+      "description": "Soldering at the Secondary School Exhibition 2025 in Trutnov.",
+      "date": "2025-10-10",
+      "place": "Uffo Trutnov, Czech Republic",
+      "showcase": "I came to the event to document the soldering work and the atmosphere around the stand. I wanted to capture not just the result, but also the process, the focus, and the people around it.",
+      "image": "cover.jpg",
+      "images": [
+        "cover.jpg"
+      ]
+    }
+  ]
+}
