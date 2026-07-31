@@ -1,15 +1,81 @@
 {
   "projects": [
     {
-      "slug": "uffo-soldering-2025",
+      "slug": "uffo-soldering-10-10-2025",
       "title": "Secondary School Exhibition 2025",
       "description": "Soldering at the Secondary School Exhibition 2025 in Trutnov.",
       "date": "2025-10-10",
-      "place": "Uffo Trutnov, Czech Republic",
-      "showcase": "I came to the event to document the soldering work and the atmosphere around the stand. I wanted to capture not just the result, but also the process, the focus, and the people around it.",
-      "image": "cover.jpg",
+      "place": "Uffo Trutnov, Czechia",
+      "showcase": "I came to the event to document the soldering work and the atmosphere on our school's the stand. I wanted to capture not just the result, but also the process, the focus, and the people around it.",
+      "image": "1.jpg",
       "images": [
-        "cover.jpg"
+        "1.jpg"
+      ]
+    },
+    {
+      "slug": "cherry-trees-11-04-2026",
+      "title": "Flowering Cherry Trees",
+      "description": "Ornamental cherry trees blooming in City Park at the start of April.",
+      "date": "2026-4-11",
+      "place": "City Park Trutnov, Czechia",
+      "showcase": "I went out to catch the first blossoms of spring, right as the ornamental cherry trees started opening up. I wanted close, quiet frames - petals catching the light, buds still closed next to flowers already in full bloom - rather than a wide shot of the whole tree.",
+      "image": "1.jpg",
+      "images": [
+        "1.jpg",
+        "2.jpg",
+        "3.jpg",
+        "4.jpg"
+      ]
+    },
+    {
+      "slug": "trains-11-04-2026",
+      "title": "Model Railway Exhibition",
+      "description": "Miniature train exhibition at the Trutnov Town Hall.",
+      "date": "2026-4-11",
+      "place": "Trutnov Town Hall, Czechia",
+      "showcase": "I came to photograph the model railway exhibition and wanted the miniature scenes to feel real - locomotives lit up, trains caught mid-motion, and enough depth of field to keep the illusion of scale intact.",
+      "image": "1.jpg",
+      "images": [
+        "1.jpg",
+        "2.jpg",
+        "3.jpg",
+        "4.jpg",
+        "5.jpg",
+        "6.jpg"
+      ]
+    },
+    {
+      "slug": "makerfaire-brno-18-10-2025",
+      "title": "Maker Faire Brno 2025",
+      "description": "Participating in the Maker Faire Brno 2025 with my photography.",
+      "date": "2025-10-18",
+      "place": "Brno, Czechia",
+      "showcase": "I attended the Maker Faire Brno 2025 to document the innovative projects and the enthusiastic community of makers and enthusiasts.",
+      "image": "1.jpg",
+      "images": [
+        "1.jpg",
+        "2.jpg",
+        "3.jpg",
+        "4.jpg",
+        "5.jpg",
+        "6.jpg",
+        "7.jpg"
+      ]
+    },
+    {
+      "slug": "gladiator-race-05-05-2026",
+      "title": "Gladiator Race 2026",
+      "description": "Documenting the exciting gladiator race event in Trutnov.",
+      "date": "2026-5-5",
+      "place": "PARA Trutnov, Czechia",
+      "showcase": "I was one of the official photographers for the Gladiator Race 2026, capturing the insanity of the race, and the determination of the participants.",
+      "image": "1.jpg",
+      "images": [
+        "1.jpg",
+        "2.jpg",
+        "3.jpg",
+        "4.jpg",
+        "5.jpg"
       ]
     }
   ]

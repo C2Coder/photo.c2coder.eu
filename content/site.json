@@ -5,12 +5,12 @@
       "instagram": "https://www.instagram.com/photo.c2c/"
     },
     "footer": {
-      "quote": "The best machine is the one you have"
+      "quote": "The best camera is the one you have"
     }
   },
   "site": {
     "title": "C2Coder Photo",
-    "tagline": "Photography, events, and stories.",
+    "tagline": "Photography, events, and fun.",
     "nav": [
       { "label": "Home", "href": "#home" },
       { "label": "Portfolio", "href": "#portfolio" },
@@ -22,8 +22,7 @@
       "headline": "Event photos with context and atmosphere.",
       "body": [
         "I photograph events that deserve to be captured as a whole, not just as a single frame. I care about how an image works together with the text, the order of the photos, and the story it tells.",
-        "I do not want galleries that are only pretty pictures without context. I like choosing images so the flow, mood, and reason for the day stay clear.",
-        "Like with my technical work, I prefer a simple and clean system. I keep the content under control so it stays easy to expand with new events, series, and topics."
+        "I do not want galleries that are only pretty pictures without context. I like choosing images so the flow, mood, and reason for the day stay clear."
       ],
       "highlights": [
         { "title": "Events", "text": "Workshops, public events, and real moments where story and pacing matter." },
@@ -44,12 +43,12 @@
       }
     },
     "about": [
-      "I am a student from the Czech Republic and photography is a companion to my work with electronics and code — same approach: understand the process end to end.",
+      "I am a student from the Czech Republic and photography is a companion to my work with electronics and code - same approach: understand the process end to end.",
       "I prefer shooting events and workshops where the process and the people around it are visible, not just the final frame.",
-      "I keep editing simple — clean crops, consistent color, and a selection that reads as a whole, not just individual photos."
+      "I keep editing simple - clean crops, consistent color, and a selection that reads as a whole, not just individual photos."
     ],
     "contactHeading": "Contact",
-    "contactLead": "If you want photos, collaboration, or just want to talk about a similar project, write me.",
+    "contactLead": "If you want photos, collaboration, or just want to yell at me how wrongly i did something, write me.",
     "contactNote": "Email or Instagram is fastest."
   }
 }

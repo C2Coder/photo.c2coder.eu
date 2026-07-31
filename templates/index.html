@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ site.title }} — {{ site.tagline }}</title>
+<title>{{ site.title }} - {{ site.tagline }}</title>
 <meta name="description" content="{{ site.hero.headline }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -144,7 +144,7 @@
   <footer class="colophon">
     <div class="wrap colophon-row">
       <p class="quote">"{{ site.shared.footer.quote }}"</p>
-      <p class="meta">© <span id="year"></span> {{ site.title }}</p>
+      <p class="meta">© <span id="year"></span> <a href="{{ site.shared.contact.instagram }}" target="_blank" rel="noopener">{{ site.title }}</a></p>
     </div>
   </footer>
 
@@ -187,25 +187,32 @@
     var lightbox = document.getElementById("lightbox");
     var lightboxImg = document.getElementById("lightboxImg");
     var lightboxThumbs = document.getElementById("lightboxThumbs");
+    var lightboxBase = "";
+    var lightboxImages = [];
+    var lightboxIndex = 0;
+
+    function showImage(index) {
+      lightboxIndex = (index + lightboxImages.length) % lightboxImages.length;
+      lightboxImg.src = lightboxBase + lightboxImages[lightboxIndex];
+      lightboxThumbs.querySelectorAll("img").forEach(function (t, i) {
+        t.classList.toggle("active", i === lightboxIndex);
+      });
+    }
 
     function openLightbox(project) {
-      var base = "/portfolio/" + project.slug + "/";
+      lightboxBase = "/portfolio/" + project.slug + "/";
+      lightboxImages = project.images;
       document.getElementById("lightboxId").textContent = "ROLL · " + project.date;
       document.getElementById("lightboxTitle").textContent = project.title;
-      lightboxImg.src = base + project.images[0];
       lightboxThumbs.innerHTML = "";
       project.images.forEach(function (image, index) {
         var thumb = document.createElement("img");
-        thumb.src = base + image;
+        thumb.src = lightboxBase + image;
         thumb.alt = "";
-        if (index === 0) thumb.classList.add("active");
-        thumb.addEventListener("click", function () {
-          lightboxImg.src = base + image;
-          lightboxThumbs.querySelectorAll("img").forEach(function (t) { t.classList.remove("active"); });
-          thumb.classList.add("active");
-        });
+        thumb.addEventListener("click", function () { showImage(index); });
         lightboxThumbs.appendChild(thumb);
       });
+      showImage(0);
       lightbox.classList.add("open");
     }
 
@@ -213,7 +220,10 @@
 
     document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
     document.addEventListener("keydown", function (e) {
+      if (!lightbox.classList.contains("open")) return;
       if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowRight") showImage(lightboxIndex + 1);
+      if (e.key === "ArrowLeft") showImage(lightboxIndex - 1);
     });
   </script>
 </body>

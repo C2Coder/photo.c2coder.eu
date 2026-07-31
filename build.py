@@ -30,6 +30,10 @@ def build() -> None:
     projects = load_json("projects.json")
     year = datetime.now().year
 
+    projects["projects"].sort(
+        key=lambda p: datetime.strptime(p["date"], "%Y-%m-%d"), reverse=True
+    )
+
     site = dict(data["site"])
     site["shared"] = data["shared"]
     html = env.get_template("index.html").render(now=year, site=site, projects=projects)

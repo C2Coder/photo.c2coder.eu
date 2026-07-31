@@ -1,6 +1,6 @@
 """Local-only management UI for adding/editing portfolio rolls.
 
-Not part of the built static site — never copied into dist/ and never
+Not part of the built static site - never copied into dist/ and never
 deployed. Binds to 127.0.0.1 only, so it's reachable exclusively when
 you're running it on your own machine (`make admin`).
 """
@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import datetime
 from pathlib import Path
 
 from flask import Flask, abort, redirect, render_template_string, request, send_from_directory, url_for
@@ -86,7 +87,7 @@ BASE = """
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roll admin — C2Coder Photo</title>
+<title>Roll admin - C2Coder Photo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -236,7 +237,12 @@ def portfolio_image(slug: str, filename: str):
 @app.route("/")
 def index():
     data = load_projects()
-    return render(INDEX_BODY, projects=data["projects"])
+    projects = sorted(
+        data["projects"],
+        key=lambda p: datetime.strptime(p["date"], "%Y-%m-%d"),
+        reverse=True,
+    )
+    return render(INDEX_BODY, projects=projects)
 
 
 @app.route("/new", methods=["GET", "POST"])
@@ -321,5 +327,5 @@ def delete_roll(slug: str):
 
 
 if __name__ == "__main__":
-    # 127.0.0.1 only — never exposed beyond this machine.
+    # 127.0.0.1 only - never exposed beyond this machine.
     app.run(host="127.0.0.1", port=8002, debug=True)
