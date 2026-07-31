@@ -1,13 +1,13 @@
 # photo.c2coder.eu
 
-Source for [photo.c2coder.eu](https://photo.c2coder.eu) — my photography
+Source for [photo.c2coder.eu](https://photo.c2coder.eu) - my photography
 portfolio, organized as dated "rolls" (one shoot/event per entry, with a
 lightbox gallery). A static site built by a small Python + Jinja2 generator,
 deployed to GitHub Pages, plus a local-only admin UI for adding rolls without
 hand-editing JSON.
 
 The main site at [c2coder.eu](https://c2coder.eu) (`../c2coder.github.io` in
-this checkout) is a sibling site built the same way — see its `DESIGN.md` for
+this checkout) is a sibling site built the same way - see its `DESIGN.md` for
 the shared visual language between the two.
 
 ## Layout
@@ -41,7 +41,7 @@ Each entry in `content/projects.json` → `projects` is a "roll":
 
 - `description` is the short blurb on the roll card. `showcase` is the longer
   note shown inside the lightbox when a roll is opened.
-- `date` must be `YYYY-MM-DD` (zero-padded) — rolls are sorted newest-first by
+- `date` must be `YYYY-MM-DD` (zero-padded) - rolls are sorted newest-first by
   this field at build time.
 - Images referenced by `image`/`images` live under `portfolio/<slug>/`.
 
@@ -60,7 +60,7 @@ make admin       # local admin UI on http://127.0.0.1:8002 for adding/editing/de
 Equivalent to `python build.py` / `python build.py --serve` / `python admin.py`.
 
 The admin UI handles slugging, image uploads, cover selection, and deleting a
-roll (JSON entry + its image folder) — it writes straight to
+roll (JSON entry + its image folder) - it writes straight to
 `content/projects.json` and `portfolio/`, then rebuilds `dist/`, so you rarely
 need to touch the JSON by hand. It's bound to `127.0.0.1` only and is never
 part of the deployed site.
