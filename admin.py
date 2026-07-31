@@ -328,4 +328,6 @@ def delete_roll(slug: str):
 
 if __name__ == "__main__":
     # 127.0.0.1 only - never exposed beyond this machine.
-    app.run(host="127.0.0.1", port=8002, debug=True)
+    # debug=False: the Werkzeug interactive debugger is an RCE risk the moment
+    # this port is ever forwarded/tunneled, even accidentally.
+    app.run(host="127.0.0.1", port=8002, debug=False)

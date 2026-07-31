@@ -209,6 +209,10 @@ h1 { font-size: clamp(2.3rem, 4.6vw, 3.6rem); line-height: 1.08; margin-top: 14p
 }
 .lightbox-bar .lightbox-id { color: #e0776a; font-size: .8rem; letter-spacing: .04em; }
 .lightbox-bar .lightbox-title { font-size: .95rem; font-weight: 700; margin-top: 4px; }
+.lightbox-bar .lightbox-note {
+  font-family: var(--sans); font-size: .85rem; line-height: 1.5; max-width: 56ch;
+  color: rgba(238, 241, 238, .7); margin-top: 8px;
+}
 .lightbox-close {
   font-family: var(--mono); font-size: .72rem; font-weight: 700; letter-spacing: .06em;
   padding: 7px 12px; border: 1px solid #eef1ee; background: transparent; color: #eef1ee; cursor: pointer;

@@ -153,6 +153,7 @@
       <div>
         <div class="lightbox-id" id="lightboxId"></div>
         <div class="lightbox-title" id="lightboxTitle"></div>
+        <p class="lightbox-note" id="lightboxNote"></p>
       </div>
       <button class="lightbox-close" type="button" id="lightboxClose">CLOSE</button>
     </div>
@@ -204,6 +205,9 @@
       lightboxImages = project.images;
       document.getElementById("lightboxId").textContent = "ROLL · " + project.date;
       document.getElementById("lightboxTitle").textContent = project.title;
+      var noteEl = document.getElementById("lightboxNote");
+      noteEl.textContent = project.showcase || "";
+      noteEl.style.display = project.showcase ? "" : "none";
       lightboxThumbs.innerHTML = "";
       project.images.forEach(function (image, index) {
         var thumb = document.createElement("img");
