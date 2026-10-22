@@ -66,7 +66,7 @@ function openLightbox(item, start) {
 
 function openRoll(p) {
   openLightbox({
-    prefix: "rolls/" + p.slug, images: p.images, title: p.title, label: "ROLL · " + p.date,
+    prefix: "rolls/" + p.slug, images: p.images, title: p.title, label: "ROLL · " + p.date.split("-").reverse().join("."),
     note: p.showcase, album: p.album ? "/albums/" + p.album + "/" : "",
   });
 }

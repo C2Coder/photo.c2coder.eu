@@ -83,6 +83,7 @@ def build() -> None:
     DIST.mkdir(parents=True, exist_ok=True)
 
     env = Environment(loader=FileSystemLoader(TEMPLATES))
+    env.filters["dmy"] = lambda iso: datetime.strptime(iso, "%Y-%m-%d").strftime("%d.%m.%Y")
     data = load_json("site.json")
     projects = load_json("projects.json")
     albums = [a for a in load_json("albums.json")["albums"] if a.get("images")]

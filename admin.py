@@ -127,8 +127,23 @@ def slugify(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", value.strip().lower()).strip("-")
 
 
+@app.template_filter("dmy")
+def dmy(iso: str | None) -> str:
+    """2026-10-20 -> 20.10.2026 (content keeps ISO dates)."""
+    try:
+        return datetime.strptime(iso or "", "%Y-%m-%d").strftime("%d.%m.%Y")
+    except ValueError:
+        return ""
+
+
 def form_fields(keys: tuple[str, ...]) -> dict:
-    return {key: request.form.get(key, "").strip() for key in keys}
+    fields = {key: request.form.get(key, "").strip() for key in keys}
+    if "date" in fields:
+        try:
+            fields["date"] = datetime.strptime(fields["date"], "%d.%m.%Y").date().isoformat()
+        except ValueError:
+            abort(400, "Date must be dd.mm.yyyy")
+    return fields
 
 
 ROLL_FIELDS = ("title", "date", "place", "description", "showcase", "album")
@@ -260,7 +275,7 @@ INDEX_BODY = """
     {% if p.image %}<img src="{{ cdn }}/rolls/{{ p.slug }}/thumb/{{ p.image }}" alt="">{% endif %}
     <div>
       <strong>{{ p.title }}</strong><br>
-      <span class="tag-label">{{ p.slug }} · {{ p.date }} · {{ p.images|length }} photos{% if p.album %} · album {{ p.album }}{% endif %}</span>
+      <span class="tag-label">{{ p.slug }} · {{ p.date|dmy }} · {{ p.images|length }} photos{% if p.album %} · album {{ p.album }}{% endif %}</span>
     </div>
   </div>
   <div class="row-actions">
@@ -279,7 +294,7 @@ INDEX_BODY = """
     {% if a.images %}<img src="{{ cdn }}/albums/{{ a.slug }}/thumb/{{ a.images[0] }}" alt="">{% endif %}
     <div>
       <strong>{{ a.title }}</strong><br>
-      <span class="tag-label">{{ a.slug }} · {{ a.date }} · {{ a.images|length }} photos</span>
+      <span class="tag-label">{{ a.slug }} · {{ a.date|dmy }} · {{ a.images|length }} photos</span>
     </div>
   </div>
   <div class="row-actions">
@@ -305,7 +320,7 @@ ROLL_BODY = """
   {% if not roll %}
   <div class="field"><label>Slug</label><input type="text" name="slug" placeholder="my-event-14-05-2026" required></div>
   {% endif %}
-  <div class="field"><label>Date</label><input type="date" name="date" value="{{ roll.date }}" required></div>
+  <div class="field"><label>Date</label><input type="text" name="date" value="{{ roll.date|dmy }}" placeholder="dd.mm.yyyy" pattern="[0-9]{1,2}[.][0-9]{1,2}[.][0-9]{4}" required></div>
   <div class="field"><label>Title</label><input type="text" name="title" value="{{ roll.title }}" required></div>
   <div class="field"><label>Place</label><input type="text" name="place" value="{{ roll.place }}"></div>
   <div class="field"><label>Description</label><textarea name="description">{{ roll.description }}</textarea></div>
@@ -375,7 +390,7 @@ ALBUM_BODY = """
   {% if not album %}
   <div class="field"><label>Slug</label><input type="text" name="slug" placeholder="my-event-14-05-2026" required></div>
   {% endif %}
-  <div class="field"><label>Date</label><input type="date" name="date" value="{{ album.date }}" required></div>
+  <div class="field"><label>Date</label><input type="text" name="date" value="{{ album.date|dmy }}" placeholder="dd.mm.yyyy" pattern="[0-9]{1,2}[.][0-9]{1,2}[.][0-9]{4}" required></div>
   <div class="field"><label>Title</label><input type="text" name="title" value="{{ album.title }}" required></div>
   <div class="field"><label>Place</label><input type="text" name="place" value="{{ album.place }}"></div>
   <div class="field"><label>Description</label><textarea name="description">{{ album.description }}</textarea></div>

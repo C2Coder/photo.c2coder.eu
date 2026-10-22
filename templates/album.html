@@ -6,7 +6,7 @@
           <span class="section-tag">Album</span>
           <h1 class="album-title">{{ album.title }}</h1>
           <div class="tag-row album-tags">
-            <span class="chip">{{ album.date }}</span>
+            <span class="chip">{{ album.date|dmy }}</span>
             {% if album.place %}<span class="chip">{{ album.place }}</span>{% endif %}
             <span class="chip">{{ album.images | length }} photos</span>
           </div>
@@ -29,7 +29,7 @@
       </div>
     </section>
     <script>
-      var ALBUM = {{ {"prefix": "albums/" + album.slug, "images": album.images, "title": album.title, "label": "ALBUM · " + album.date} | tojson }};
+      var ALBUM = {{ {"prefix": "albums/" + album.slug, "images": album.images, "title": album.title, "label": "ALBUM · " + album.date|dmy} | tojson }};
       function openAlbum(i) { openLightbox(ALBUM, i); }
     </script>
 {% endblock %}

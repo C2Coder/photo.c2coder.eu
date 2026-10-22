@@ -47,7 +47,7 @@
                 onclick='openRoll({{ project | tojson }})'>
               <span class="log-id">ROLL {{ "%03d"|format(loop.index) }}</span>
               <div class="tag-row">
-                <span class="chip">{{ project.date }}</span>
+                <span class="chip">{{ project.date|dmy }}</span>
                 <span class="chip">{{ project.place }}</span>
               </div>
             </div>
