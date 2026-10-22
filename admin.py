@@ -59,7 +59,8 @@ def check_access():
         jwt.decode(token, key, algorithms=["RS256"], audience=os.environ["CF_ACCESS_AUD"])
     except Exception:
         abort(403)
-    if request.method == "POST" and request.headers.get("Origin", f"https://{request.host}") != f"https://{request.host}":
+    # Origin is "null" under Referrer-Policy: no-referrer, so check Sec-Fetch-Site instead
+    if request.method == "POST" and request.headers.get("Sec-Fetch-Site", "same-origin") not in ("same-origin", "none"):
         abort(403)
 
 
@@ -188,7 +189,7 @@ def process_album(slug: str, zip_key: str) -> None:
 
 BASE = """
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -199,6 +200,7 @@ BASE = """
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/site.css">
 <style>
+  :root { color-scheme: dark; }
   .admin-wrap { max-width: 860px; margin: 0 auto; padding: 40px 28px 80px; }
   .admin-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 34px 0 20px; flex-wrap: wrap; }
   .admin-head:first-child { margin-top: 0; }
