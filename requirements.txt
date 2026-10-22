@@ -2,3 +2,6 @@ Jinja2
 livereload
 Flask
 Pillow
+boto3
+PyJWT[crypto]
+gunicorn

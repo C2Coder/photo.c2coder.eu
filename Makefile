@@ -10,4 +10,4 @@ serve-live:
 	python build.py --serve
 
 admin:
-	python admin.py
+	ADMIN_DEV=1 python admin.py

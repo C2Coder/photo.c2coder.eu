@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block main %}
+    <section id="album">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="section-tag">Album</span>
+          <h1 class="album-title">{{ album.title }}</h1>
+          <div class="tag-row album-tags">
+            <span class="chip">{{ album.date }}</span>
+            {% if album.place %}<span class="chip">{{ album.place }}</span>{% endif %}
+            <span class="chip">{{ album.images | length }} photos</span>
+          </div>
+          {% if album.description %}<p>{{ album.description }}</p>{% endif %}
+          <div class="cta-row">
+            <a href="{{ site.cdn }}/{{ album.zip }}" class="btn btn-solid" download>Download all (zip, {{ zip_size }})</a>
+            <a href="/#portfolio" class="btn btn-line">Portfolio</a>
+          </div>
+        </div>
+        <div class="album-grid">
+          {% for image in album.images %}
+          <img
+            src="{{ site.cdn }}/albums/{{ album.slug }}/thumb/{{ image }}"
+            alt="{{ album.title }} - photo {{ loop.index }}"
+            width="800" height="600"
+            loading="{{ 'eager' if loop.index <= 8 else 'lazy' }}"
+            onclick="openAlbum({{ loop.index0 }})">
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+    <script>
+      var ALBUM = {{ {"prefix": "albums/" + album.slug, "images": album.images, "title": album.title, "label": "ALBUM · " + album.date} | tojson }};
+      function openAlbum(i) { openLightbox(ALBUM, i); }
+    </script>
+{% endblock %}

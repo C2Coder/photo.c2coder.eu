@@ -7,14 +7,12 @@ from datetime import date, datetime
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
-from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parent
 TEMPLATES = ROOT / "templates"
 CONTENT = ROOT / "content"
 DIST = ROOT / "dist"
-THUMB_WIDTH = 800
 
 
 def load_json(name: str):
@@ -41,15 +39,42 @@ def write_seo_files(base: str, paths: list[str]) -> None:
     )
 
 
-def write_thumbs(portfolio: Path) -> None:
-    for src in portfolio.glob("*/*.jpg"):
-        out = DIST / "portfolio" / src.parent.name / "thumbs" / src.name
-        if out.exists() and out.stat().st_mtime >= src.stat().st_mtime:
-            continue
-        out.parent.mkdir(parents=True, exist_ok=True)
-        with Image.open(src) as img:
-            img.thumbnail((THUMB_WIDTH, THUMB_WIDTH * 2))
-            img.convert("RGB").save(out, "JPEG", quality=80, optimize=True, progressive=True)
+def human_size(size: int) -> str:
+    if size >= 1e9:
+        return f"{size / 1e9:.1f} GB"
+    return f"{size / 1e6:.0f} MB" if size >= 1e7 else f"{size / 1e6:.1f} MB"
+
+
+def write_album(env: Environment, site: dict, album: dict, base: str) -> None:
+    cdn = site["cdn"]
+    url = f"{base}/albums/{album['slug']}/"
+    images = [f"{cdn}/albums/{album['slug']}/{name}" for name in album["images"]]
+    description = album.get("description") or f"{len(images)} photos from {album['title']}, {album.get('place', '')} ({album['date']})."
+    seo = {
+        "title": f"{album['title']} - C2Coder Photo album",
+        "description": description,
+        "url": url,
+        "type": "website",
+        "image": images[0] if images else None,
+        "card": "summary_large_image",
+        "jsonld": ld({
+            "@context": "https://schema.org",
+            "@type": "ImageGallery",
+            "name": album["title"],
+            "url": url,
+            "dateCreated": album["date"],
+            "author": {"@id": base + "/#person"},
+            "image": images[:50],
+        }),
+    }
+    out = DIST / "albums" / album["slug"] / "index.html"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(
+        env.get_template("album.html").render(
+            seo=seo, site=site, album=album, nav_prefix="/", zip_size=human_size(album["zip_size"])
+        ),
+        encoding="utf-8",
+    )
 
 
 def build() -> None:
@@ -60,8 +85,15 @@ def build() -> None:
     env = Environment(loader=FileSystemLoader(TEMPLATES))
     data = load_json("site.json")
     projects = load_json("projects.json")
+    albums = [a for a in load_json("albums.json")["albums"] if a.get("images")]
     year = datetime.now().year
 
+    # Rolls without photos yet and links to albums still empty are left out.
+    album_slugs = {a["slug"] for a in albums}
+    projects["projects"] = [p for p in projects["projects"] if p["images"]]
+    for p in projects["projects"]:
+        if p.get("album") not in album_slugs:
+            p["album"] = ""
     projects["projects"].sort(
         key=lambda p: datetime.strptime(p["date"], "%Y-%m-%d"), reverse=True
     )
@@ -74,7 +106,7 @@ def build() -> None:
     covers = [
         {
             "@type": "ImageObject",
-            "contentUrl": f"{base}/portfolio/{p['slug']}/{p['image']}",
+            "contentUrl": f"{site['cdn']}/rolls/{p['slug']}/{p['image']}",
             "name": p["title"],
             "caption": p["description"],
         }
@@ -119,19 +151,17 @@ def build() -> None:
         }),
     }
 
-    html = env.get_template("index.html").render(now=year, seo=seo, site=site, projects=projects)
+    html = env.get_template("index.html").render(now=year, seo=seo, site=site, projects=projects, nav_prefix="")
     (DIST / "index.html").write_text(html, encoding="utf-8")
 
-    write_seo_files(base, ["/"])
+    for album in albums:
+        write_album(env, site, album, base)
+
+    write_seo_files(base, ["/"] + [f"/albums/{a['slug']}/" for a in albums])
 
     c_name = ROOT / "CNAME"
     if c_name.exists():
         shutil.copy2(c_name, DIST / "CNAME")
-
-    portfolio = ROOT / "portfolio"
-    if portfolio.exists():
-        shutil.copytree(portfolio, DIST / "portfolio", dirs_exist_ok=True)
-        write_thumbs(portfolio)
 
     static = ROOT / "static"
     if static.exists():
@@ -147,7 +177,6 @@ def serve() -> None:
     server = Server()
     server.watch(str(TEMPLATES / "*.html"), build)
     server.watch(str(CONTENT / "*.json"), build)
-    server.watch(str(ROOT / "portfolio" / "**"), build)
     server.watch(str(ROOT / "static" / "**"), build)
     server.serve(root=str(DIST), host="0.0.0.0", port=8001)
 

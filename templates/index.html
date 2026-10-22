@@ -1,53 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-{% include "_seo.html" %}
-<link rel="icon" href="/static/favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="/static/favicon.png">
-<meta name="theme-color" content="#f2f4f1" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0d1113" media="(prefers-color-scheme: dark)">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/site.css">
-<script>
-  (function () {
-    var saved = localStorage.getItem("theme");
-    var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    document.documentElement.setAttribute("data-theme", theme);
-  })();
-</script>
-</head>
-<body>
-  <header class="masthead">
-    <div class="wrap masthead-row">
-      <a href="#home" class="wordmark">{{ site.title }}<span class="wordmark-dot">.</span></a>
-      <nav class="masthead-nav">
-        {% for item in site.nav %}
-        <a href="{{ item.href }}"><span class="nav-index">{{ "%02d"|format(loop.index) }}</span>{{ item.label }}</a>
-        {% endfor %}
-      </nav>
-      <div class="masthead-controls">
-        <button class="ctrl-btn" id="themeToggle" type="button" aria-label="Toggle theme">DARK</button>
-        <button class="ctrl-btn menu-btn" id="menuToggle" type="button" aria-label="Toggle menu">MENU</button>
-      </div>
-    </div>
-    <div class="masthead-meta">{{ site.tagline }}</div>
-  </header>
-
-  <div class="nav-overlay" id="navOverlay">
-    <div class="nav-overlay-top">
-      <span class="wordmark">{{ site.title }}<span class="wordmark-dot">.</span></span>
-      <button class="ctrl-btn" id="menuClose" type="button" aria-label="Close menu">CLOSE</button>
-    </div>
-    {% for item in site.nav %}
-    <a href="{{ item.href }}"><span class="nav-index">{{ "%02d"|format(loop.index) }}</span>{{ item.label }}</a>
-    {% endfor %}
-  </div>
-
-  <main>
+{% extends "base.html" %}
+{% block main %}
     <section id="home">
       <div class="wrap hero-grid">
         <div>
@@ -88,11 +40,11 @@
             <div class="log-meta">
               <img
                 class="log-thumb"
-                src="/portfolio/{{ project.slug }}/thumbs/{{ project.image }}"
+                src="{{ site.cdn }}/rolls/{{ project.slug }}/thumb/{{ project.image }}"
                 alt="{{ project.title }} - {{ project.place }}"
                 width="800" height="600"
                 loading="lazy"
-                onclick='openLightbox({{ project | tojson }})'>
+                onclick='openRoll({{ project | tojson }})'>
               <span class="log-id">ROLL {{ "%03d"|format(loop.index) }}</span>
               <div class="tag-row">
                 <span class="chip">{{ project.date }}</span>
@@ -104,7 +56,8 @@
                 <h3>{{ project.title }}</h3>
               </div>
               <p>{{ project.description }}</p>
-              <button type="button" class="entry-link" onclick='openLightbox({{ project | tojson }})'>open roll →</button>
+              <button type="button" class="entry-link" onclick='openRoll({{ project | tojson }})'>open roll →</button>
+              {% if project.album %}<a class="entry-link entry-link-album" href="/albums/{{ project.album }}/">full album →</a>{% endif %}
             </div>
           </article>
           {% endfor %}
@@ -144,108 +97,4 @@
         </div>
       </div>
     </section>
-  </main>
-
-  <footer class="colophon">
-    <div class="wrap colophon-row">
-      <p class="quote">"{{ site.shared.footer.quote }}"</p>
-      <p class="meta"><a href="https://c2coder.eu">C2Coder website</a> · <a href="https://link.c2coder.eu">C2Coder links</a> · <a href="https://qr.c2coder.eu">QR code generator</a></p>
-      <p class="meta">© <span id="year"></span> <a href="{{ site.shared.contact.instagram }}" target="_blank" rel="noopener">{{ site.title }}</a> <button type="button" class="cookies-btn" id="cookies">Cookies</button></p>
-    </div>
-  </footer>
-
-  <div class="lightbox" id="lightbox">
-    <div class="wrap lightbox-bar">
-      <div>
-        <div class="lightbox-id" id="lightboxId"></div>
-        <div class="lightbox-title" id="lightboxTitle"></div>
-        <p class="lightbox-note" id="lightboxNote"></p>
-      </div>
-      <button class="lightbox-close" type="button" id="lightboxClose">CLOSE</button>
-    </div>
-    <div class="lightbox-stage">
-      <img id="lightboxImg" src="" alt="">
-    </div>
-    <div class="wrap lightbox-thumbs" id="lightboxThumbs"></div>
-  </div>
-
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-
-    function currentTheme() { return document.documentElement.getAttribute("data-theme"); }
-    function paintThemeButton() {
-      document.getElementById("themeToggle").textContent = currentTheme() === "dark" ? "LIGHT" : "DARK";
-    }
-    paintThemeButton();
-    document.getElementById("themeToggle").addEventListener("click", function () {
-      var next = currentTheme() === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem("theme", next);
-      paintThemeButton();
-    });
-
-    var overlay = document.getElementById("navOverlay");
-    document.getElementById("menuToggle").addEventListener("click", function () { overlay.classList.add("open"); });
-    document.getElementById("menuClose").addEventListener("click", function () { overlay.classList.remove("open"); });
-    overlay.querySelectorAll("a").forEach(function (link) {
-      link.addEventListener("click", function () { overlay.classList.remove("open"); });
-    });
-
-    var lightbox = document.getElementById("lightbox");
-    var lightboxImg = document.getElementById("lightboxImg");
-    var lightboxThumbs = document.getElementById("lightboxThumbs");
-    var lightboxBase = "";
-    var lightboxImages = [];
-    var lightboxIndex = 0;
-    var lightboxTitle = "";
-
-    function showImage(index) {
-      lightboxIndex = (index + lightboxImages.length) % lightboxImages.length;
-      lightboxImg.src = lightboxBase + lightboxImages[lightboxIndex];
-      lightboxImg.alt = lightboxTitle + " - photo " + (lightboxIndex + 1);
-      lightboxThumbs.querySelectorAll("img").forEach(function (t, i) {
-        t.classList.toggle("active", i === lightboxIndex);
-      });
-    }
-
-    function openLightbox(project) {
-      lightboxBase = "/portfolio/" + project.slug + "/";
-      lightboxImages = project.images;
-      lightboxTitle = project.title;
-      document.getElementById("lightboxId").textContent = "ROLL · " + project.date;
-      document.getElementById("lightboxTitle").textContent = project.title;
-      var noteEl = document.getElementById("lightboxNote");
-      noteEl.textContent = project.showcase || "";
-      noteEl.style.display = project.showcase ? "" : "none";
-      lightboxThumbs.innerHTML = "";
-      project.images.forEach(function (image, index) {
-        var thumb = document.createElement("img");
-        thumb.src = lightboxBase + "thumbs/" + image;
-        thumb.alt = project.title + " - thumbnail " + (index + 1);
-        thumb.loading = "lazy";
-        thumb.addEventListener("click", function () { showImage(index); });
-        lightboxThumbs.appendChild(thumb);
-      });
-      showImage(0);
-      lightbox.classList.add("open");
-    }
-
-    function closeLightbox() { lightbox.classList.remove("open"); }
-
-    document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
-    document.addEventListener("keydown", function (e) {
-      if (!lightbox.classList.contains("open")) return;
-      if (e.key === "Escape") closeLightbox();
-      if (e.key === "ArrowRight") showImage(lightboxIndex + 1);
-      if (e.key === "ArrowLeft") showImage(lightboxIndex - 1);
-    });
-  </script>
-  <div class="consent" id="consent" hidden>
-    <span>Analytics cookies help me see how the site is used.</span>
-    <button type="button" class="ctrl-btn" id="consent_no">Decline</button>
-    <button type="button" class="ctrl-btn ctrl-btn-accent" id="consent_yes">Accept</button>
-  </div>
-
-  <script src="/static/js/analytics.js"></script>
-</body>
-</html>
+{% endblock %}

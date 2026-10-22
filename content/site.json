@@ -10,6 +10,7 @@
   },
   "site": {
     "title": "C2Coder Photo",
+    "cdn": "https://photo.c2cdn.eu",
     "tagline": "Photography, events, and fun.",
     "nav": [
       { "label": "Home", "href": "#home" },

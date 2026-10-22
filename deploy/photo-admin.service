@@ -1,0 +1,22 @@
+[Unit]
+Description=Photo admin (photo-admin.c2cdn.eu)
+After=network.target
+
+[Service]
+User=c2coder
+WorkingDirectory=/home/c2coder/Codes/Projects/C2Coder/photo.c2coder.eu
+EnvironmentFile=/home/c2coder/.config/photo-admin/env
+Environment=PHOTO_REPO=/home/c2coder/.local/share/photo-admin/repo
+Environment=GIT_SSH_KEY=/home/c2coder/.ssh/photo-admin
+# One process: album progress and the git lock live in memory.
+ExecStart=/home/c2coder/Codes/Projects/C2Coder/photo.c2coder.eu/.venv/bin/gunicorn admin:app --bind 127.0.0.1:8327 --workers 1 --threads 8 --timeout 300
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/home/c2coder/.local/share/photo-admin
+
+[Install]
+WantedBy=multi-user.target
