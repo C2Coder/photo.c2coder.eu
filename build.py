@@ -89,6 +89,11 @@ def build() -> None:
     albums = [a for a in load_json("albums.json")["albums"] if a.get("images")]
     year = datetime.now().year
 
+    # Thumbnail sizes keep vertical photos vertical; 4:3 for anything not measured.
+    for item in projects["projects"] + albums:
+        sizes = item.get("sizes", {})
+        item["sizes"] = {n: sizes.get(n, [800, 600]) for n in item["images"]}
+
     # Rolls without photos yet and links to albums still empty are left out.
     album_slugs = {a["slug"] for a in albums}
     projects["projects"] = [p for p in projects["projects"] if p["images"]]

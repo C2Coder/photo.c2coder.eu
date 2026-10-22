@@ -32,6 +32,7 @@ ROOT = Path(__file__).resolve().parent
 REPO = Path(os.environ.get("PHOTO_REPO", ROOT))
 CONTENT = REPO / "content"
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+NAME_RE = re.compile(r"^[a-z0-9-]+\.jpg$")
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 DEV = os.environ.get("ADMIN_DEV") == "1"
 
@@ -175,9 +176,10 @@ def process_album(slug: str, zip_key: str) -> None:
                 if not entries:
                     raise ValueError("no .jpg files in the zip")
                 status.update(state="processing", total=len(entries), done=0)
-                names = []
+                names, sizes = [], {}
                 for entry in entries:
-                    names.append(media.upload_image(prefix, zf.read(entry), PurePath(entry.filename).name))
+                    name, sizes[name] = media.upload_image(prefix, zf.read(entry), PurePath(entry.filename).name)
+                    names.append(name)
                     status["done"] += 1
 
         old = {}
@@ -185,7 +187,7 @@ def process_album(slug: str, zip_key: str) -> None:
         def apply(data):
             album = find(data["albums"], slug)
             old.update(zip=album.get("zip"), images=album.get("images", []))
-            album.update(zip=zip_key, zip_size=size, images=names)
+            album.update(zip=zip_key, zip_size=size, images=names, sizes=sizes)
 
         status["state"] = "publishing"
         mutate("albums.json", f"album {slug}: new photos", apply)
@@ -232,15 +234,21 @@ BASE = """
   .field textarea { resize: vertical; min-height: 70px; }
   .field textarea.code { font-family: var(--mono); font-size: .8rem; min-height: 520px; }
   .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: 1px solid var(--line); }
-  .row img { width: 72px; height: 54px; object-fit: cover; border: 1px solid var(--line); }
+  .row img { width: 72px; height: 72px; object-fit: contain; border: 1px solid var(--line); }
   .row-main { display: flex; align-items: center; gap: 16px; }
   .row-actions { display: flex; gap: 10px; }
   .image-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
   .image-card { border: 1px solid var(--line); padding: 8px; font-family: var(--mono); font-size: .72rem; text-align: center; }
-  .image-card img { width: 110px; height: 80px; object-fit: cover; margin-bottom: 6px; border: 1px solid var(--line); }
+  .image-card { cursor: grab; }
+  .image-card.dragging { opacity: .35; }
+  .image-card.new { border-style: dashed; border-color: var(--accent); }
+  .image-card img { display: block; width: 110px; height: 110px; object-fit: contain; margin-bottom: 6px; background: var(--paper-2, rgba(255,255,255,.04)); }
+  .card-tools { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .card-tools .mv { font-family: var(--mono); background: none; border: 1px solid var(--line); color: var(--ink); padding: 0 7px; cursor: pointer; }
+  .card-tools .mv:hover { border-color: var(--accent); color: var(--accent); }
   .image-card label { display: flex; align-items: center; gap: 6px; justify-content: center; margin-top: 4px; color: var(--ink-soft); text-transform: none; letter-spacing: 0; }
   .thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 6px; margin-top: 8px; }
-  .thumbs img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border: 1px solid var(--line); }
+  .thumbs img { width: 100%; aspect-ratio: 1; object-fit: contain; border: 1px solid var(--line); }
   .flash { font-family: var(--mono); font-size: .8rem; color: var(--accent); margin: 10px 0 20px; }
   .danger { border-color: var(--accent); color: var(--accent); }
   .danger:hover { background: var(--accent); color: var(--accent-contrast); }
@@ -316,7 +324,7 @@ ROLL_BODY = """
   <a class="btn btn-line" href="{{ url_for('index') }}">&larr; Back</a>
 </div>
 {% if error %}<p class="flash">{{ error }}</p>{% endif %}
-<form method="post">
+<form method="post" id="rollForm">
   {% if not roll %}
   <div class="field"><label>Slug</label><input type="text" name="slug" placeholder="my-event-14-05-2026" required></div>
   {% endif %}
@@ -333,43 +341,107 @@ ROLL_BODY = """
     </select>
   </div>
 
-  {% if roll and roll.images %}
+  {% if roll %}
   <div class="field">
-    <label>Images (pick cover, check to delete)</label>
-    <div class="image-grid">
+    <label>Images - drag or use the arrows to reorder, the first one is the cover</label>
+    <div class="image-grid" id="grid">
       {% for img in roll.images %}
-      <div class="image-card">
-        <img src="{{ cdn }}/rolls/{{ roll.slug }}/thumb/{{ img }}" alt="">
-        <label><input type="radio" name="cover" value="{{ img }}" {{ 'checked' if img == roll.image else '' }}> cover</label>
-        <label><input type="checkbox" name="delete_images" value="{{ img }}"> delete</label>
+      <div class="image-card" draggable="true" data-name="{{ img }}">
+        <img src="{{ cdn }}/rolls/{{ roll.slug }}/thumb/{{ img }}" alt="" draggable="false">
+        <div class="card-tools"><button type="button" class="mv" data-d="-1">&lt;</button><span class="pos"></span><button type="button" class="mv" data-d="1">&gt;</button></div>
+        <label><input type="checkbox" class="del"> delete</label>
       </div>
       {% endfor %}
     </div>
   </div>
+  <div class="field">
+    <label>Add images (uploaded when you save)</label>
+    <input type="file" id="files" accept="image/*" multiple>
+  </div>
+  <input type="hidden" name="order" id="order">
+  <input type="hidden" name="sizes" id="sizes">
+  <p class="flash" id="upStatus"></p>
   {% endif %}
 
   <button class="btn btn-solid" type="submit">{{ "Save" if roll else "Create roll, then add images" }}</button>
 </form>
 
 {% if roll %}
-<div class="admin-head"><h2>Add images</h2></div>
-<div class="field">
-  <input type="file" id="files" accept="image/*" multiple>
-</div>
-<p class="flash" id="upStatus"></p>
+<template id="cardTpl">
+  <div class="image-card new" draggable="true" data-name="">
+    <img src="" alt="" draggable="false">
+    <div class="card-tools"><button type="button" class="mv" data-d="-1">&lt;</button><span class="pos"></span><button type="button" class="mv" data-d="1">&gt;</button></div>
+    <label><input type="checkbox" class="del"> remove</label>
+  </div>
+</template>
 <script>
-document.getElementById("files").addEventListener("change", async function () {
-  var files = Array.from(this.files), status = document.getElementById("upStatus");
-  for (var i = 0; i < files.length; i++) {
-    status.textContent = "uploading " + (i + 1) + " / " + files.length + ": " + files[i].name;
-    var fd = new FormData(); fd.append("image", files[i]);
+var grid = document.getElementById("grid"), statusEl = document.getElementById("upStatus");
+var newFiles = new Map();  // card -> File, uploaded on save
+var dragged = null;
+
+function number() {
+  Array.from(grid.children).forEach(function (c, i) {
+    c.querySelector(".pos").textContent = i === 0 ? "cover" : String(i + 1);
+  });
+}
+number();
+
+document.getElementById("files").addEventListener("change", function () {
+  Array.from(this.files).forEach(function (file) {
+    var card = document.getElementById("cardTpl").content.firstElementChild.cloneNode(true);
+    card.querySelector("img").src = URL.createObjectURL(file);
+    newFiles.set(card, file);
+    grid.appendChild(card);
+  });
+  this.value = "";
+  number();
+});
+
+grid.addEventListener("click", function (e) {
+  var b = e.target.closest(".mv");
+  if (!b) return;
+  var c = b.closest(".image-card");
+  if (b.dataset.d === "-1" && c.previousElementSibling) grid.insertBefore(c, c.previousElementSibling);
+  if (b.dataset.d === "1" && c.nextElementSibling) grid.insertBefore(c.nextElementSibling, c);
+  number();
+});
+grid.addEventListener("dragstart", function (e) {
+  dragged = e.target.closest(".image-card");
+  e.dataTransfer.setData("text/plain", "");
+  dragged.classList.add("dragging");
+});
+grid.addEventListener("dragend", function () {
+  dragged.classList.remove("dragging");
+  dragged = null;
+  number();
+});
+grid.addEventListener("dragover", function (e) {
+  e.preventDefault();
+  var over = e.target.closest(".image-card");
+  if (!dragged || !over || over === dragged) return;
+  var r = over.getBoundingClientRect();
+  grid.insertBefore(dragged, e.clientX > r.left + r.width / 2 ? over.nextSibling : over);
+});
+
+document.getElementById("rollForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  var form = this, sizes = {};
+  var cards = Array.from(grid.children).filter(function (c) { return !c.querySelector(".del").checked; });
+  var todo = cards.filter(function (c) { return newFiles.has(c); });
+  for (var i = 0; i < todo.length; i++) {
+    statusEl.textContent = "uploading " + (i + 1) + " / " + todo.length;
+    var fd = new FormData(); fd.append("image", newFiles.get(todo[i]));
     var r = await fetch("{{ url_for('roll_image', slug=roll.slug) }}", { method: "POST", body: fd });
-    if (!r.ok) { status.textContent = "failed on " + files[i].name + ": " + (await r.text()).slice(0, 200); return; }
+    if (!r.ok) { statusEl.textContent = "upload failed: " + (await r.text()).slice(0, 200); return; }
+    var up = await r.json();
+    todo[i].dataset.name = up.name;
+    sizes[up.name] = up.size;
+    newFiles.delete(todo[i]);
   }
-  status.textContent = "publishing...";
-  var r = await fetch("{{ url_for('roll_publish', slug=roll.slug) }}", { method: "POST" });
-  if (!r.ok) { status.textContent = "publish failed: " + (await r.text()).slice(0, 200); return; }
-  location.reload();
+  statusEl.textContent = "saving...";
+  document.getElementById("order").value = cards.map(function (c) { return c.dataset.name; }).join(",");
+  document.getElementById("sizes").value = JSON.stringify(sizes);
+  form.submit();
 });
 </script>
 
@@ -408,6 +480,7 @@ ALBUM_BODY = """
   <label>Zip with .jpg files</label>
   <input type="file" id="zip" accept=".zip,application/zip">
 </div>
+<button class="btn btn-solid" type="button" id="zipUpload">Upload zip</button>
 <progress id="bar" value="0" max="1" hidden></progress>
 <p class="flash" id="upStatus"></p>
 {% if album.images %}
@@ -416,26 +489,28 @@ ALBUM_BODY = """
 </div>
 {% endif %}
 <script>
-var bar = document.getElementById("bar"), status = document.getElementById("upStatus");
+var bar = document.getElementById("bar"), statusEl = document.getElementById("upStatus");
+var zipBtn = document.getElementById("zipUpload");
 
 // watching: true once this page started (or saw) a run, so "done" reloads only after a run
 function poll(watching) {
   fetch("{{ url_for('album_status', slug=album.slug) }}").then(function (r) { return r.json(); }).then(function (s) {
     if (!s.state) return;
-    if (s.state === "error") { status.textContent = "error: " + s.error; return; }
+    if (s.state === "error") { statusEl.textContent = "error: " + s.error; zipBtn.disabled = false; return; }
     if (s.state === "done") { if (watching) location.reload(); return; }
-    status.textContent = s.state + (s.total ? " " + s.done + " / " + s.total : "");
+    statusEl.textContent = s.state + (s.total ? " " + s.done + " / " + s.total : "");
     if (s.total) { bar.hidden = false; bar.max = s.total; bar.value = s.done; }
     setTimeout(function () { poll(true); }, 1500);
   });
 }
 poll(false);
 
-document.getElementById("zip").addEventListener("change", async function () {
-  var file = this.files[0];
-  if (!file) return;
+document.getElementById("zipUpload").addEventListener("click", async function () {
+  var file = document.getElementById("zip").files[0];
+  if (!file) { statusEl.textContent = "choose a zip first"; return; }
+  zipBtn.disabled = true;
   var r = await fetch("{{ url_for('album_presign', slug=album.slug) }}", { method: "POST" });
-  if (!r.ok) { status.textContent = "presign failed: " + (await r.text()).slice(0, 200); return; }
+  if (!r.ok) { statusEl.textContent = "presign failed: " + (await r.text()).slice(0, 200); zipBtn.disabled = false; return; }
   var up = await r.json();
   var xhr = new XMLHttpRequest();
   xhr.open("PUT", up.url);
@@ -443,14 +518,14 @@ document.getElementById("zip").addEventListener("change", async function () {
   bar.hidden = false;
   xhr.upload.onprogress = function (e) {
     bar.max = e.total; bar.value = e.loaded;
-    status.textContent = "uploading zip " + Math.round(e.loaded / 1e6) + " / " + Math.round(e.total / 1e6) + " MB";
+    statusEl.textContent = "uploading zip " + Math.round(e.loaded / 1e6) + " / " + Math.round(e.total / 1e6) + " MB";
   };
-  xhr.onerror = function () { status.textContent = "upload failed"; };
+  xhr.onerror = function () { statusEl.textContent = "upload failed"; zipBtn.disabled = false; };
   xhr.onload = async function () {
-    if (xhr.status !== 200) { status.textContent = "upload failed: " + xhr.status; return; }
+    if (xhr.status !== 200) { statusEl.textContent = "upload failed: " + xhr.status; zipBtn.disabled = false; return; }
     var fd = new FormData(); fd.append("key", up.key);
     var p = await fetch("{{ url_for('album_process', slug=album.slug) }}", { method: "POST", body: fd });
-    if (!p.ok) { status.textContent = "processing failed: " + (await p.text()).slice(0, 200); return; }
+    if (!p.ok) { statusEl.textContent = "processing failed: " + (await p.text()).slice(0, 200); zipBtn.disabled = false; return; }
     poll(true);
   };
   xhr.send(file);
@@ -510,16 +585,22 @@ def edit_roll(slug: str):
         roll = find(read("projects.json")["projects"], slug)
         return render(ROLL_BODY, roll=roll, albums=by_date(read("albums.json")["albums"]), error=None)
 
-    removed = request.form.getlist("delete_images")
+    # The page sends the final image order (new uploads included, deleted ones left
+    # out) and the thumbnail sizes of the new uploads.
+    order = [n for n in request.form.get("order", "").split(",") if n]
+    new_sizes = json.loads(request.form.get("sizes") or "{}")
+    if not all(NAME_RE.match(n) for n in order):
+        abort(400, "Bad image name")
+    removed = []
 
     def apply(data):
         roll = find(data["projects"], slug)
         roll.update(form_fields(ROLL_FIELDS))
-        roll["images"] = [n for n in roll["images"] if n not in removed]
-        cover = request.form.get("cover")
-        if cover in roll["images"]:
-            roll["images"] = [cover] + [n for n in roll["images"] if n != cover]
-        roll["image"] = roll["images"][0] if roll["images"] else ""
+        removed[:] = [n for n in roll["images"] if n not in order]
+        sizes = {**roll.get("sizes", {}), **new_sizes}
+        roll["images"] = order
+        roll["sizes"] = {n: sizes[n] for n in order if n in sizes}
+        roll["image"] = order[0] if order else ""
 
     mutate("projects.json", f"roll {slug}: edit", apply)
     for name in removed:
@@ -527,32 +608,15 @@ def edit_roll(slug: str):
     return redirect(url_for("edit_roll", slug=slug))
 
 
-PENDING: dict[str, list[str]] = {}
-
-
 @app.route("/rolls/<slug>/image", methods=["POST"])
 def roll_image(slug: str):
+    """Upload one image to R2. It only joins the roll when the page is saved."""
     find(read("projects.json")["projects"], slug)
     file = request.files.get("image")
     if not file or Path(file.filename or "").suffix.lower() not in IMAGE_EXTS:
         return "not an image", 400
-    name = media.upload_image(f"rolls/{slug}", file.read(), file.filename)
-    PENDING.setdefault(slug, []).append(name)
-    return "ok"
-
-
-@app.route("/rolls/<slug>/publish", methods=["POST"])
-def roll_publish(slug: str):
-    names = PENDING.pop(slug, [])
-
-    def apply(data):
-        roll = find(data["projects"], slug)
-        roll["images"] += [n for n in names if n not in roll["images"]]
-        roll["image"] = roll["image"] or (roll["images"][0] if roll["images"] else "")
-
-    if names:
-        mutate("projects.json", f"roll {slug}: add {len(names)} photos", apply)
-    return "ok"
+    name, size = media.upload_image(f"rolls/{slug}", file.read(), file.filename)
+    return jsonify(name=name, size=size)
 
 
 @app.route("/rolls/<slug>/delete", methods=["POST"])

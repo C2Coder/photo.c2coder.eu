@@ -69,9 +69,9 @@ def _jpeg(img: Image.Image, quality: int) -> bytes:
     return out.getvalue()
 
 
-def process(data: bytes, filename: str) -> tuple[str, bytes, bytes]:
-    """Return (name, web bytes, thumb bytes). Always makes a thumbnail, only
-    re-encodes the web copy when it is too big, rotated by EXIF or not a JPEG."""
+def process(data: bytes, filename: str) -> tuple[str, bytes, bytes, list[int]]:
+    """Return (name, web bytes, thumb bytes, thumb [w, h]). Always makes a thumbnail,
+    only re-encodes the web copy when it is too big, rotated by EXIF or not a JPEG."""
     stem = re.sub(r"[^a-z0-9]+", "-", PurePath(filename).stem.lower()).strip("-") or "img"
     name = f"{stem}-{hashlib.sha256(data).hexdigest()[:8]}.jpg"
 
@@ -87,14 +87,17 @@ def process(data: bytes, filename: str) -> tuple[str, bytes, bytes]:
             web = _jpeg(big, 85)
         img.thumbnail((THUMB_WIDTH, THUMB_WIDTH * 2), Image.LANCZOS)
         thumb = _jpeg(img, 80)
-    return name, web, thumb
+        size = list(img.size)
+    return name, web, thumb, size
 
 
-def upload_image(prefix: str, data: bytes, filename: str) -> str:
-    name, web, thumb = process(data, filename)
+def upload_image(prefix: str, data: bytes, filename: str) -> tuple[str, list[int]]:
+    """Upload web + thumb, return (name, thumb [w, h]) - the size lets pages lay out
+    vertical and horizontal photos before they load."""
+    name, web, thumb, size = process(data, filename)
     put(f"{prefix}/{name}", web)
     put(f"{prefix}/thumb/{name}", thumb)
-    return name
+    return name, size
 
 
 def delete_image(prefix: str, name: str) -> None:

@@ -18,10 +18,11 @@
         </div>
         <div class="album-grid">
           {% for image in album.images %}
+          {% set w, h = album.sizes[image] %}
           <img
             src="{{ site.cdn }}/albums/{{ album.slug }}/thumb/{{ image }}"
             alt="{{ album.title }} - photo {{ loop.index }}"
-            width="800" height="600"
+            width="{{ w }}" height="{{ h }}" style="--r: {{ '%.3f'|format(w / h) }}"
             loading="{{ 'eager' if loop.index <= 8 else 'lazy' }}"
             onclick="openAlbum({{ loop.index0 }})">
           {% endfor %}

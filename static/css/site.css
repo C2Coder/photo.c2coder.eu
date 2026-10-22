@@ -148,7 +148,7 @@ h1 { font-size: clamp(2.3rem, 4.6vw, 3.6rem); line-height: 1.08; margin-top: 14p
 .log-entry:first-child { border-top: none; padding-top: 0; }
 .log-meta { display: flex; flex-direction: column; gap: 10px; }
 .log-thumb {
-  display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover;
+  display: block; width: 100%; height: auto;
   border: 1px solid var(--ink); cursor: zoom-in;
 }
 .log-id { font-family: var(--mono); font-size: .76rem; color: var(--accent); letter-spacing: .04em; }
@@ -222,7 +222,7 @@ h1 { font-size: clamp(2.3rem, 4.6vw, 3.6rem); line-height: 1.08; margin-top: 14p
 .lightbox-stage img { max-width: 100%; max-height: 100%; object-fit: contain; border: 1px solid #3a4340; }
 .lightbox-thumbs { flex-shrink: 0; display: flex; gap: 8px; padding-top: 16px; overflow-x: auto; }
 .lightbox-thumbs img {
-  height: 64px; width: 84px; object-fit: cover; border: 1px solid rgba(238, 241, 238, .3);
+  height: 64px; width: auto; border: 1px solid rgba(238, 241, 238, .3);
   cursor: pointer; opacity: .6; transition: opacity .15s ease, border-color .15s ease;
 }
 .lightbox-thumbs img:hover, .lightbox-thumbs img.active { opacity: 1; border-color: #e0776a; }
@@ -233,9 +233,12 @@ h1 { font-size: clamp(2.3rem, 4.6vw, 3.6rem); line-height: 1.08; margin-top: 14p
 /* Album page */
 .album-title { font-size: clamp(1.8rem, 3.4vw, 2.6rem); }
 .album-tags { margin-top: 14px; }
-.album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+/* Justified rows: each photo grows in proportion to its aspect ratio (--r), so a row
+   shares one height and vertical photos stay uncropped. ::after keeps the last row short. */
+.album-grid { --row: 230px; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; }
+.album-grid::after { content: ""; flex-grow: 999; }
 .album-grid img {
-  display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover;
+  display: block; flex: var(--r) 1 calc(var(--r) * var(--row)); min-width: 0; height: auto;
   border: 1px solid var(--line); cursor: zoom-in;
 }
 .album-grid img:hover { border-color: var(--accent); }
@@ -249,7 +252,7 @@ h1 { font-size: clamp(2.3rem, 4.6vw, 3.6rem); line-height: 1.08; margin-top: 14p
   .menu-btn { display: inline-flex; }
   .masthead-meta { display: none; }
   section { padding: 60px 0; }
-  .album-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .album-grid { --row: 130px; gap: 5px; }
 }
 
 /* Cookie consent */

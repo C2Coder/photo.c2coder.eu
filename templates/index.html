@@ -42,7 +42,7 @@
                 class="log-thumb"
                 src="{{ site.cdn }}/rolls/{{ project.slug }}/thumb/{{ project.image }}"
                 alt="{{ project.title }} - {{ project.place }}"
-                width="800" height="600"
+                width="{{ project.sizes[project.image][0] }}" height="{{ project.sizes[project.image][1] }}"
                 loading="lazy"
                 onclick='openRoll({{ project | tojson }})'>
               <span class="log-id">ROLL {{ "%03d"|format(loop.index) }}</span>
