@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import sys
 import shutil
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
@@ -18,6 +18,25 @@ DIST = ROOT / "dist"
 def load_json(name: str):
     with open(CONTENT / name, "r", encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def base_url() -> str:
+    return "https://" + (ROOT / "CNAME").read_text().strip()
+
+
+def ld(data: dict) -> str:
+    return json.dumps(data, ensure_ascii=False).replace("<", "\\u003c")
+
+
+def write_seo_files(base: str, paths: list[str]) -> None:
+    today = date.today().isoformat()
+    (DIST / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {base}/sitemap.xml\n", encoding="utf-8")
+    urls = "".join(f"  <url><loc>{base}{p}</loc><lastmod>{today}</lastmod></url>\n" for p in paths)
+    (DIST / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n',
+        encoding="utf-8",
+    )
 
 
 def build() -> None:
@@ -36,8 +55,59 @@ def build() -> None:
 
     site = dict(data["site"])
     site["shared"] = data["shared"]
-    html = env.get_template("index.html").render(now=year, site=site, projects=projects)
+    base = base_url()
+    contact = site["shared"]["contact"]
+    main_site = site["hero"]["secondary"]["href"]
+    covers = [
+        {
+            "@type": "ImageObject",
+            "contentUrl": f"{base}/portfolio/{p['slug']}/{p['image']}",
+            "name": p["title"],
+            "caption": p["description"],
+        }
+        for p in projects["projects"]
+    ]
+    seo = {
+        "title": f"{site['title']} - {site['tagline']}",
+        "description": f"{site['hero']['headline']} {site['tagline']}",
+        "url": base + "/",
+        "type": "website",
+        "image": covers[0]["contentUrl"] if covers else None,
+        "card": "summary_large_image",
+        "jsonld": ld({
+            "@context": "https://schema.org",
+            "@graph": [
+                {
+                    "@type": "WebSite",
+                    "@id": base + "/#website",
+                    "name": site["title"],
+                    "url": base + "/",
+                    "inLanguage": "en",
+                },
+                {
+                    "@type": "Person",
+                    "@id": base + "/#person",
+                    "name": "C2Coder",
+                    "jobTitle": "Photographer",
+                    "url": main_site,
+                    "email": contact["photo"],
+                    "sameAs": [contact["instagram"], main_site],
+                },
+                {
+                    "@type": "ImageGallery",
+                    "name": site["title"],
+                    "url": base + "/",
+                    "author": {"@id": base + "/#person"},
+                    "image": covers,
+                },
+            ],
+        }),
+    }
+
+    html = env.get_template("index.html").render(now=year, seo=seo, site=site, projects=projects)
     (DIST / "index.html").write_text(html, encoding="utf-8")
+
+    write_seo_files(base, ["/"])
 
     c_name = ROOT / "CNAME"
     if c_name.exists():

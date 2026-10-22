@@ -1,0 +1,12 @@
+<title>{{ seo.title | e }}</title>
+<meta name="description" content="{{ seo.description | e }}">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="{{ seo.url }}">
+<meta property="og:site_name" content="{{ site.title | e }}">
+<meta property="og:title" content="{{ seo.title | e }}">
+<meta property="og:description" content="{{ seo.description | e }}">
+<meta property="og:url" content="{{ seo.url }}">
+<meta property="og:type" content="{{ seo.type }}">
+{% if seo.image %}<meta property="og:image" content="{{ seo.image }}">
+{% endif %}<meta name="twitter:card" content="{{ seo.card }}">
+<script type="application/ld+json">{{ seo.jsonld }}</script>
