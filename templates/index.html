@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 {% include "_seo.html" %}
+<link rel="icon" href="/static/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/static/favicon.png">
+<meta name="theme-color" content="#f2f4f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1113" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -84,8 +88,9 @@
             <div class="log-meta">
               <img
                 class="log-thumb"
-                src="/portfolio/{{ project.slug }}/{{ project.image }}"
+                src="/portfolio/{{ project.slug }}/thumbs/{{ project.image }}"
                 alt="{{ project.title }} - {{ project.place }}"
+                width="800" height="600"
                 loading="lazy"
                 onclick='openLightbox({{ project | tojson }})'>
               <span class="log-id">ROLL {{ "%03d"|format(loop.index) }}</span>
@@ -144,6 +149,7 @@
   <footer class="colophon">
     <div class="wrap colophon-row">
       <p class="quote">"{{ site.shared.footer.quote }}"</p>
+      <p class="meta"><a href="https://c2coder.eu">C2Coder website</a> · <a href="https://link.c2coder.eu">C2Coder links</a> · <a href="https://qr.c2coder.eu">QR code generator</a></p>
       <p class="meta">© <span id="year"></span> <a href="{{ site.shared.contact.instagram }}" target="_blank" rel="noopener">{{ site.title }}</a> <button type="button" class="cookies-btn" id="cookies">Cookies</button></p>
     </div>
   </footer>
@@ -214,7 +220,7 @@
       lightboxThumbs.innerHTML = "";
       project.images.forEach(function (image, index) {
         var thumb = document.createElement("img");
-        thumb.src = lightboxBase + image;
+        thumb.src = lightboxBase + "thumbs/" + image;
         thumb.alt = project.title + " - thumbnail " + (index + 1);
         thumb.loading = "lazy";
         thumb.addEventListener("click", function () { showImage(index); });

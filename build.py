@@ -7,12 +7,14 @@ from datetime import date, datetime
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
+from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parent
 TEMPLATES = ROOT / "templates"
 CONTENT = ROOT / "content"
 DIST = ROOT / "dist"
+THUMB_WIDTH = 800
 
 
 def load_json(name: str):
@@ -37,6 +39,17 @@ def write_seo_files(base: str, paths: list[str]) -> None:
         f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n',
         encoding="utf-8",
     )
+
+
+def write_thumbs(portfolio: Path) -> None:
+    for src in portfolio.glob("*/*.jpg"):
+        out = DIST / "portfolio" / src.parent.name / "thumbs" / src.name
+        if out.exists() and out.stat().st_mtime >= src.stat().st_mtime:
+            continue
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with Image.open(src) as img:
+            img.thumbnail((THUMB_WIDTH, THUMB_WIDTH * 2))
+            img.convert("RGB").save(out, "JPEG", quality=80, optimize=True, progressive=True)
 
 
 def build() -> None:
@@ -68,8 +81,8 @@ def build() -> None:
         for p in projects["projects"]
     ]
     seo = {
-        "title": f"{site['title']} - {site['tagline']}",
-        "description": f"{site['hero']['headline']} {site['tagline']}",
+        "title": "C2Coder Photo - Event Photography from Czechia",
+        "description": "C2Coder photo portfolio: event photography from Trutnov, Brno and across Czechia - maker faires, exhibitions, races and nature. Photos by C2Coder.",
         "url": base + "/",
         "type": "website",
         "image": covers[0]["contentUrl"] if covers else None,
@@ -83,6 +96,8 @@ def build() -> None:
                     "name": site["title"],
                     "url": base + "/",
                     "inLanguage": "en",
+                    "alternateName": ["photo c2coder", "c2coder photo"],
+                    "publisher": {"@id": base + "/#person"},
                 },
                 {
                     "@type": "Person",
@@ -91,7 +106,7 @@ def build() -> None:
                     "jobTitle": "Photographer",
                     "url": main_site,
                     "email": contact["photo"],
-                    "sameAs": [contact["instagram"], main_site],
+                    "sameAs": [contact["instagram"], main_site, "https://link.c2coder.eu", "https://qr.c2coder.eu"],
                 },
                 {
                     "@type": "ImageGallery",
@@ -116,10 +131,13 @@ def build() -> None:
     portfolio = ROOT / "portfolio"
     if portfolio.exists():
         shutil.copytree(portfolio, DIST / "portfolio", dirs_exist_ok=True)
+        write_thumbs(portfolio)
 
     static = ROOT / "static"
     if static.exists():
         shutil.copytree(static, DIST / "static", dirs_exist_ok=True)
+        if (static / "favicon.ico").exists():
+            shutil.copy2(static / "favicon.ico", DIST / "favicon.ico")
 
 
 def serve() -> None:
